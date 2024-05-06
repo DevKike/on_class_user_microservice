@@ -5,6 +5,7 @@ import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.EmailAl
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.NotFoundException;
 import com.onclass.user.microservice.configuration.Constants;
 import com.onclass.user.microservice.domain.exception.InvalidEmailException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,21 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @ControllerAdvice
 @RequiredArgsConstructor
 public class ControllerAdvisor {
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        List<String> errors = ex.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .toList();
+        ExceptionMissingArgumentsResponse errorResponse = new ExceptionMissingArgumentsResponse(Constants.ALL_FIELDS_ARE_REQUIRED_EXCEPTION_MESSAGE, errors);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(
