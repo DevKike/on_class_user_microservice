@@ -2,6 +2,8 @@ package com.onclass.user.microservice.adapters.driven.jpa.mysql.adapter;
 
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.entity.RoleEntity;
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.entity.UserEntity;
+import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.DocumentAlreadyExistsException;
+import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.EmailAlreadyExistsException;
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.NotFoundException;
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.mapper.IUserEntityMapper;
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.repository.IRoleRepository;
@@ -21,6 +23,18 @@ public class UserAdapter implements IUserPersistencePort {
 
     @Override
     public void createUserAsAdmin(User user) {
+        List<UserEntity> usersByDocument = userRepository.findByDocument(user.getDocument());
+
+        if (!usersByDocument.isEmpty()) {
+            throw new DocumentAlreadyExistsException();
+        }
+
+        List<UserEntity> usersByEmail = userRepository.findByEmail(user.getEmail());
+
+        if (!usersByEmail.isEmpty()) {
+            throw new EmailAlreadyExistsException();
+        }
+
         List<String> adminRoleNames = Arrays.asList("admin", "Admin", "administrator", "Administrator");
 
         RoleEntity adminRole = roleRepository.findByNameIn(adminRoleNames)
