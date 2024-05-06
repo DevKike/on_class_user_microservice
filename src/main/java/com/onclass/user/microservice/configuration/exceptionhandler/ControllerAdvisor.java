@@ -1,5 +1,7 @@
 package com.onclass.user.microservice.configuration.exceptionhandler;
 
+import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.DocumentAlreadyExistsException;
+import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.EmailAlreadyExistsException;
 import com.onclass.user.microservice.adapters.driven.jpa.mysql.exception.NotFoundException;
 import com.onclass.user.microservice.configuration.Constants;
 import com.onclass.user.microservice.domain.exception.InvalidEmailException;
@@ -27,6 +29,24 @@ public class ControllerAdvisor {
     public ResponseEntity<ExceptionResponse> handleInvalidEmailException() {
         return ResponseEntity.badRequest().body(new ExceptionResponse(
                 Constants.INVALID_EMAIL_EXCEPTION_MESSAGE,
+                HttpStatus.BAD_REQUEST.toString(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(DocumentAlreadyExistsException.class)
+    public ResponseEntity<ExceptionResponse> handleDocumentAlreadyExistsException() {
+        return ResponseEntity.badRequest().body(new ExceptionResponse(
+                Constants.DOCUMENT_ALREADY_EXISTS_EXCEPTION_MESSAGE,
+                HttpStatus.BAD_REQUEST.toString(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ExceptionResponse> handleEmailAlreadyExistsException() {
+        return ResponseEntity.badRequest().body(new ExceptionResponse(
+                Constants.EMAIL_ALREADY_EXISTS_EXCEPTION_MESSAGE,
                 HttpStatus.BAD_REQUEST.toString(),
                 LocalDateTime.now()
         ));
